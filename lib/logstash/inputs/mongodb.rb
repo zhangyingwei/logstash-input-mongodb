@@ -93,7 +93,8 @@ class LogStash::Inputs::MongoDB < LogStash::Inputs::Base
     since = sqlitedb[SINCE_TABLE]
     mongo_collection = mongodb.collection(mongo_collection_name)
 
-    first_entry = mongo_collection.find({}).sort(since_column => 1).limit(1).first
+    # zhagnyw
+    first_entry = mongo_collection.find({ :endTime: { :$ne: null } }).sort(since_column => 1).limit(1).first
     first_entry_id = ''
     if since_type == 'id'
       first_entry_id = first_entry[since_column].to_s
@@ -148,7 +149,7 @@ class LogStash::Inputs::MongoDB < LogStash::Inputs::Base
     collection = mongodb.collection(mongo_collection_name)
     # Need to make this sort by date in object id then get the first of the series
     # db.events_20150320.find().limit(1).sort({ts:1})
-    return collection.find({:_id => {:$gt => last_id_object}}).limit(batch_size)
+    return collection.find({:endTime => {:$ne: null, :$gt => last_id_object}}).limit(batch_size)
   end
 
   public
